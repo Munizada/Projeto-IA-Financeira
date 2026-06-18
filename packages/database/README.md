@@ -39,6 +39,42 @@ DATABASE_URL="postgresql://postgres:postgres@localhost:5432/ia_financeira_whatsa
 
 O arquivo `.env.example` ja contem uma URL falsa de desenvolvimento.
 
+## PostgreSQL Local Via Docker
+
+Quando Docker estiver disponivel no ambiente, crie um `docker-compose.yml` na raiz do projeto com:
+
+```yaml
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: ia-financeira-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: ia_financeira_whatsapp
+    ports:
+      - "5432:5432"
+    volumes:
+      - ia_financeira_postgres_data:/var/lib/postgresql/data
+
+volumes:
+  ia_financeira_postgres_data:
+```
+
+Depois suba o banco:
+
+```bash
+docker compose up -d postgres
+```
+
+Com o banco pronto, rode:
+
+```bash
+corepack pnpm --filter @ia-financeira/database prisma:migrate
+corepack pnpm --filter @ia-financeira/database prisma:seed
+```
+
 ## Comandos
 
 Na raiz do projeto:
