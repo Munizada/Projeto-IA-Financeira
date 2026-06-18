@@ -6,7 +6,7 @@ A regra central do projeto e:
 
 > IA interpreta; core calcula, valida e registra.
 
-Nesta etapa o foco e somente monorepo, tipos compartilhados e motor financeiro puro. Nao ha banco, API real, web real, WhatsApp, IA, Pix real ou Prisma implementados ainda.
+Nesta fase o projeto ja tem o monorepo, o core financeiro puro, o pacote de banco com Prisma e a API base em NestJS. Ainda nao ha WhatsApp, IA, frontend real, Open Finance ou Pix real.
 
 ## Stack
 
@@ -16,54 +16,55 @@ Nesta etapa o foco e somente monorepo, tipos compartilhados e motor financeiro p
 - Vitest
 - ESLint
 - Prettier
-- Zod em `packages/shared`
+- Zod
+- Prisma
+- NestJS
 
 ## Estrutura
 
 ```txt
 apps/
-  api/       Placeholder da API futura
+  api/       API NestJS base
   web/       Placeholder da web futura
 packages/
   core/      Motor financeiro puro
   shared/    Enums, tipos e schemas Zod
-  database/  Placeholder do PostgreSQL/Prisma futuro
+  database/  Schema PostgreSQL/Prisma
 docs/        Documentacao de produto e arquitetura
 ```
 
 ## Como instalar
 
 ```bash
-pnpm install
-```
-
-Se `pnpm` nao estiver no PATH, use:
-
-```bash
 corepack pnpm install
 ```
 
-## Comandos
-
-```bash
-pnpm lint
-pnpm typecheck
-pnpm test
-pnpm format:check
-```
-
-Com Corepack:
+## Comandos Principais
 
 ```bash
 corepack pnpm lint
 corepack pnpm typecheck
 corepack pnpm test
+corepack pnpm build
 corepack pnpm format:check
 ```
 
-## Status atual
+## Comandos Da API
 
-Etapa 1 implementada: monorepo TypeScript, `packages/shared`, `packages/core` e testes automatizados do core financeiro.
+```bash
+corepack pnpm --filter @ia-financeira/api dev
+corepack pnpm --filter @ia-financeira/api test
+corepack pnpm --filter @ia-financeira/api typecheck
+corepack pnpm --filter @ia-financeira/api build
+```
+
+## Status Atual
+
+- Etapa 1 implementada: monorepo, `packages/shared` e `packages/core`;
+- Etapa 2 implementada: `packages/database` com Prisma, migration e seed;
+- Etapa 3 implementada: API base em NestJS com endpoints de health, spaces, members, expenses, balances, settlement e payments.
+
+## Regra Financeira
 
 O core financeiro cobre:
 
@@ -76,3 +77,5 @@ O core financeiro cobre:
 - calculo de saldos;
 - simplificacao de dividas;
 - pagamento confirmado como lancamento reverso no ledger.
+
+A API usa `packages/core` para calculos financeiros e `packages/database` para persistencia. Ela nao duplica regra critica de dinheiro.

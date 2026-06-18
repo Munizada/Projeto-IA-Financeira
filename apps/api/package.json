@@ -4,10 +4,29 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "dev": "node -e \"console.log('API sera implementada em etapa futura')\"",
-    "build": "node -e \"console.log('API placeholder sem build real nesta etapa')\"",
-    "test": "vitest run --passWithNoTests",
-    "lint": "eslint . --no-error-on-unmatched-pattern",
-    "typecheck": "node -e \"console.log('API placeholder sem TypeScript real nesta etapa')\""
+    "dev": "corepack pnpm --filter @ia-financeira/shared build && corepack pnpm --filter @ia-financeira/core build && corepack pnpm --filter @ia-financeira/database build && tsx watch src/main.ts",
+    "build": "corepack pnpm --filter @ia-financeira/shared build && corepack pnpm --filter @ia-financeira/core build && corepack pnpm --filter @ia-financeira/database build && tsc -p tsconfig.build.json",
+    "start": "node dist/main.js",
+    "lint": "eslint .",
+    "typecheck": "corepack pnpm --filter @ia-financeira/shared build && corepack pnpm --filter @ia-financeira/core build && corepack pnpm --filter @ia-financeira/database build && tsc -p tsconfig.json --noEmit",
+    "test": "vitest run"
+  },
+  "dependencies": {
+    "@ia-financeira/core": "workspace:*",
+    "@ia-financeira/database": "workspace:*",
+    "@ia-financeira/shared": "workspace:*",
+    "@nestjs/common": "^11.1.9",
+    "@nestjs/core": "^11.1.9",
+    "@nestjs/platform-express": "^11.1.9",
+    "reflect-metadata": "^0.2.2",
+    "rxjs": "^7.8.2",
+    "zod": "^3.25.67"
+  },
+  "devDependencies": {
+    "@nestjs/testing": "^11.1.9",
+    "@types/supertest": "^6.0.3",
+    "supertest": "^7.1.4",
+    "tsx": "^4.20.6",
+    "vitest": "^3.2.4"
   }
 }
