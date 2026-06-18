@@ -1,0 +1,21 @@
+{
+  "name": "@ia-financeira/core",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "scripts": {
+    "dev": "vitest --watch",
+    "build": "tsc -p tsconfig.json",
+    "test": "vitest run",
+    "lint": "eslint .",
+    "typecheck": "corepack pnpm --filter @ia-financeira/shared build && tsc -p tsconfig.json --noEmit"
+  },
+  "dependencies": {
+    "@ia-financeira/shared": "workspace:*"
+  },
+  "devDependencies": {
+    "vitest": "^3.2.4"
+  }
+}

@@ -1,0 +1,13 @@
+{
+  "name": "@ia-financeira/web",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "node -e \"console.log('Web sera implementada em etapa futura')\"",
+    "build": "node -e \"console.log('Web placeholder sem build real nesta etapa')\"",
+    "test": "vitest run --passWithNoTests",
+    "lint": "eslint . --no-error-on-unmatched-pattern",
+    "typecheck": "node -e \"console.log('Web placeholder sem TypeScript real nesta etapa')\""
+  }
+}
