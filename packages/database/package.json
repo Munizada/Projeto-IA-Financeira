@@ -3,11 +3,31 @@
   "version": "0.1.0",
   "private": true,
   "type": "module",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    }
+  },
   "scripts": {
-    "dev": "node -e \"console.log('Database sera implementado em etapa futura')\"",
-    "build": "node -e \"console.log('Database placeholder sem build real nesta etapa')\"",
+    "dev": "prisma studio",
+    "build": "tsc -p tsconfig.json",
     "test": "vitest run --passWithNoTests",
-    "lint": "eslint . --no-error-on-unmatched-pattern",
-    "typecheck": "node -e \"console.log('Database placeholder sem TypeScript real nesta etapa')\""
+    "lint": "eslint .",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "prisma:validate": "node scripts/with-database-url.mjs prisma validate",
+    "prisma:generate": "node scripts/with-database-url.mjs prisma generate",
+    "prisma:migrate": "node scripts/with-database-url.mjs prisma migrate dev",
+    "prisma:seed": "tsx prisma/seed.ts",
+    "db:reset": "node scripts/with-database-url.mjs prisma migrate reset"
+  },
+  "dependencies": {
+    "@prisma/client": "^6.19.0"
+  },
+  "devDependencies": {
+    "prisma": "^6.19.0",
+    "tsx": "^4.20.6"
   }
 }
