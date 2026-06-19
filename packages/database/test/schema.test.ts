@@ -98,7 +98,7 @@ describe("database package scripts", () => {
       "prisma:validate": "node scripts/with-database-url.mjs prisma validate",
       "prisma:generate": "node scripts/with-database-url.mjs prisma generate",
       "prisma:migrate": "node scripts/with-database-url.mjs prisma migrate dev",
-      "prisma:seed": "tsx prisma/seed.ts",
+      "prisma:seed": "node scripts/with-database-url.mjs tsx prisma/seed.ts",
       "db:reset": "node scripts/with-database-url.mjs prisma migrate reset"
     });
   });

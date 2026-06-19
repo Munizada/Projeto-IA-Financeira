@@ -47,11 +47,14 @@ corepack pnpm typecheck
 corepack pnpm test
 corepack pnpm build
 corepack pnpm format:check
+corepack pnpm db:validate
+corepack pnpm db:generate
 ```
 
 ## Comandos Da API
 
 ```bash
+corepack pnpm api:dev
 corepack pnpm --filter @ia-financeira/api dev
 corepack pnpm --filter @ia-financeira/api test
 corepack pnpm --filter @ia-financeira/api typecheck
@@ -61,6 +64,7 @@ corepack pnpm --filter @ia-financeira/api build
 ## Comandos Da Web
 
 ```bash
+corepack pnpm web:dev
 corepack pnpm --filter @ia-financeira/web dev
 corepack pnpm --filter @ia-financeira/web test
 corepack pnpm --filter @ia-financeira/web typecheck

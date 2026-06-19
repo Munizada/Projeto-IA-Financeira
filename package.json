@@ -14,7 +14,9 @@
     "db:validate": "corepack pnpm --filter @ia-financeira/database prisma:validate",
     "db:generate": "corepack pnpm --filter @ia-financeira/database prisma:generate",
     "db:migrate": "corepack pnpm --filter @ia-financeira/database prisma:migrate",
-    "db:seed": "corepack pnpm --filter @ia-financeira/database prisma:seed"
+    "db:seed": "corepack pnpm --filter @ia-financeira/database prisma:seed",
+    "api:dev": "corepack pnpm --filter @ia-financeira/api dev",
+    "web:dev": "corepack pnpm --filter @ia-financeira/web dev"
   },
   "devDependencies": {
     "@eslint/js": "^9.30.1",

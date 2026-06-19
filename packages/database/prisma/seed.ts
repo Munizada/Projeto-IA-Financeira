@@ -13,8 +13,10 @@ import {
   PrismaClient
 } from "@prisma/client";
 
-process.env.DATABASE_URL ??=
-  "postgresql://postgres:postgres@localhost:5432/ia_financeira_whatsapp?schema=public";
+if (!process.env.DATABASE_URL) {
+  console.error("DATABASE_URL is required to run the database seed.");
+  process.exit(1);
+}
 
 const prisma = new PrismaClient();
 

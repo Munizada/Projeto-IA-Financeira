@@ -25,7 +25,7 @@ export async function bootstrap(): Promise<void> {
   const env = getEnv();
   const app = await configureApp();
 
-  await app.listen(env.PORT);
+  await app.listen(env.API_PORT);
 }
 
 if (process.argv[1] && pathToFileURL(process.argv[1]).href === import.meta.url) {
