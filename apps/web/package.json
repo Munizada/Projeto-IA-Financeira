@@ -4,10 +4,23 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "dev": "node -e \"console.log('Web sera implementada em etapa futura')\"",
-    "build": "node -e \"console.log('Web placeholder sem build real nesta etapa')\"",
-    "test": "vitest run --passWithNoTests",
+    "dev": "next dev --port 3000",
+    "build": "next build",
+    "start": "next start --port 3000",
     "lint": "eslint . --no-error-on-unmatched-pattern",
-    "typecheck": "node -e \"console.log('Web placeholder sem TypeScript real nesta etapa')\""
+    "typecheck": "next typegen && tsc -p tsconfig.json --noEmit",
+    "test": "vitest run"
+  },
+  "dependencies": {
+    "@ia-financeira/shared": "workspace:*",
+    "next": "^15.0.0",
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0",
+    "zod": "^3.25.67"
+  },
+  "devDependencies": {
+    "@types/react": "^19.0.0",
+    "@types/react-dom": "^19.0.0",
+    "vitest": "^3.2.4"
   }
 }

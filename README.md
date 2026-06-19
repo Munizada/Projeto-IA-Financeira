@@ -6,7 +6,7 @@ A regra central do projeto e:
 
 > IA interpreta; core calcula, valida e registra.
 
-Nesta fase o projeto ja tem o monorepo, o core financeiro puro, o pacote de banco com Prisma e a API base em NestJS. Ainda nao ha WhatsApp, IA, frontend real, Open Finance ou Pix real.
+Nesta fase o projeto ja tem o monorepo, o core financeiro puro, o pacote de banco com Prisma, a API base em NestJS e a web base em Next.js. Ainda nao ha WhatsApp, IA, Open Finance ou Pix real.
 
 ## Stack
 
@@ -25,7 +25,7 @@ Nesta fase o projeto ja tem o monorepo, o core financeiro puro, o pacote de banc
 ```txt
 apps/
   api/       API NestJS base
-  web/       Placeholder da web futura
+  web/       Web base Next.js
 packages/
   core/      Motor financeiro puro
   shared/    Enums, tipos e schemas Zod
@@ -58,11 +58,21 @@ corepack pnpm --filter @ia-financeira/api typecheck
 corepack pnpm --filter @ia-financeira/api build
 ```
 
+## Comandos Da Web
+
+```bash
+corepack pnpm --filter @ia-financeira/web dev
+corepack pnpm --filter @ia-financeira/web test
+corepack pnpm --filter @ia-financeira/web typecheck
+corepack pnpm --filter @ia-financeira/web build
+```
+
 ## Status Atual
 
 - Etapa 1 implementada: monorepo, `packages/shared` e `packages/core`;
 - Etapa 2 implementada: `packages/database` com Prisma, migration e seed;
 - Etapa 3 implementada: API base em NestJS com endpoints de health, spaces, members, expenses, balances, settlement e payments.
+- Etapa 4 implementada: web base em Next.js com landing, espacos, detalhe, despesas, saldos e acerto.
 
 ## Regra Financeira
 
