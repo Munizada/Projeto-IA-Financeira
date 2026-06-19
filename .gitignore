@@ -2,10 +2,13 @@ node_modules/
 dist/
 coverage/
 .env
+.neon
 .env.local
 .env.production
+.agents/
 .next/
 .turbo/
+skills-lock.json
 *.tsbuildinfo
 .DS_Store
 *.log
