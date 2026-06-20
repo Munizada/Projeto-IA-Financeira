@@ -12,10 +12,10 @@ describe("SettlementService", () => {
   it("generates settlement through simplifyDebts and ignores zero balances", async () => {
     const balanceService = {
       getBySpaceId: vi.fn().mockResolvedValue([
-        { memberId: "member-arthur", balanceMinor: 12000, currency: "BRL" },
-        { memberId: "member-bruno", balanceMinor: -6000, currency: "BRL" },
-        { memberId: "member-caio", balanceMinor: -6000, currency: "BRL" },
-        { memberId: "member-ana", balanceMinor: 0, currency: "BRL" }
+        { memberId: "member-arthur", memberName: "Arthur", balanceMinor: 12000, currency: "BRL" },
+        { memberId: "member-bruno", memberName: "Bruno", balanceMinor: -6000, currency: "BRL" },
+        { memberId: "member-caio", memberName: "Caio", balanceMinor: -6000, currency: "BRL" },
+        { memberId: "member-ana", memberName: "Ana", balanceMinor: 0, currency: "BRL" }
       ])
     };
     const simplifySpy = vi.spyOn(core, "simplifyDebts");
@@ -24,15 +24,21 @@ describe("SettlementService", () => {
     await expect(service.getBySpaceId("space-1")).resolves.toEqual([
       {
         fromMemberId: "member-bruno",
+        fromMemberName: "Bruno",
         toMemberId: "member-arthur",
+        toMemberName: "Arthur",
         amountMinor: 6000,
-        currency: "BRL"
+        currency: "BRL",
+        status: "manual_pending"
       },
       {
         fromMemberId: "member-caio",
+        fromMemberName: "Caio",
         toMemberId: "member-arthur",
+        toMemberName: "Arthur",
         amountMinor: 6000,
-        currency: "BRL"
+        currency: "BRL",
+        status: "manual_pending"
       }
     ]);
     expect(simplifySpy).toHaveBeenCalled();

@@ -153,11 +153,21 @@ export class ExpensesService {
 
     await this.ensureSpaceExists(parsedSpaceId);
 
-    return this.database.expense.findMany({
-      where: { spaceId: parsedSpaceId },
-      include: { splits: true, ledgerEntries: true },
-      orderBy: { createdAt: "desc" }
-    });
+    return this.database.expense
+      .findMany({
+        where: { spaceId: parsedSpaceId },
+        include: {
+          ledgerEntries: true,
+          payer: { include: { user: true } },
+          splits: {
+            include: {
+              member: { include: { user: true } }
+            }
+          }
+        },
+        orderBy: { createdAt: "desc" }
+      })
+      .then((expenses) => expenses.map(mapExpenseForWeb));
   }
 
   async getById(spaceId: string, expenseId: string): Promise<unknown> {
@@ -190,4 +200,39 @@ export class ExpensesService {
 
 function uniqueValues(values: string[]): string[] {
   return [...new Set(values)];
+}
+
+function mapExpenseForWeb(expense: {
+  id: string;
+  description: string;
+  category: string | null;
+  amountMinor: number;
+  currency: string;
+  expenseDate: Date;
+  payerMemberId: string;
+  status: string;
+  payer: { nickname: string | null; user: { displayName: string } };
+  splits: Array<{
+    memberId: string;
+    amountMinor: number;
+    member: { nickname: string | null; user: { displayName: string } };
+  }>;
+}) {
+  return {
+    id: expense.id,
+    description: expense.description,
+    category: expense.category ?? "geral",
+    amountMinor: expense.amountMinor,
+    currency: expense.currency,
+    expenseDate: expense.expenseDate.toISOString(),
+    payerMemberId: expense.payerMemberId,
+    payerMemberName: expense.payer.nickname ?? expense.payer.user.displayName,
+    status: expense.status,
+    splitRule: "equal",
+    splits: expense.splits.map((split) => ({
+      memberId: split.memberId,
+      memberName: split.member.nickname ?? split.member.user.displayName,
+      amountMinor: split.amountMinor
+    }))
+  };
 }

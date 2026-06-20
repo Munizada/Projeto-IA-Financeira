@@ -56,12 +56,63 @@ describe("SpacesService", () => {
     const service = new SpacesService(new DatabaseService(database as unknown as DatabaseClient));
     const space = {
       id: "space-1",
-      name: "Floripa MVP"
+      name: "Floripa MVP",
+      type: "trip",
+      status: "active",
+      currency: "BRL",
+      expenses: [],
+      ledgerEntries: [],
+      members: []
     };
 
     database.space.findUnique.mockResolvedValue(space);
 
-    await expect(service.getById("space-1")).resolves.toEqual(space);
+    await expect(service.getById("space-1")).resolves.toMatchObject({
+      id: "space-1",
+      name: "Floripa MVP",
+      members: [],
+      totalExpensesMinor: 0
+    });
+  });
+
+  it("lists spaces in the web summary shape", async () => {
+    const database = createDatabaseMock();
+    const service = new SpacesService(new DatabaseService(database as unknown as DatabaseClient));
+
+    database.space.findMany.mockResolvedValue([
+      {
+        id: "space-1",
+        name: "Floripa MVP",
+        type: "trip",
+        status: "active",
+        currency: "BRL",
+        expenses: [{ amountMinor: 48000 }],
+        ledgerEntries: [],
+        members: [
+          {
+            id: "member-arthur",
+            role: "organizer",
+            status: "active",
+            nickname: "Arthur",
+            user: { displayName: "Arthur" }
+          }
+        ]
+      }
+    ]);
+
+    await expect(service.list()).resolves.toEqual([
+      expect.objectContaining({
+        id: "space-1",
+        name: "Floripa MVP",
+        totalExpensesMinor: 48000,
+        members: [
+          expect.objectContaining({
+            id: "member-arthur",
+            name: "Arthur"
+          })
+        ]
+      })
+    ]);
   });
 
   it("returns error when space is not found", async () => {

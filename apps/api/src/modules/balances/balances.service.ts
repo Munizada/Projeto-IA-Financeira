@@ -9,7 +9,9 @@ import { spaceIdSchema } from "../spaces/spaces.schemas.js";
 export class BalancesService {
   constructor(private readonly database: DatabaseService) {}
 
-  async getBySpaceId(spaceId: string): Promise<ReturnType<typeof core.calculateBalances>> {
+  async getBySpaceId(
+    spaceId: string
+  ): Promise<Array<ReturnType<typeof core.calculateBalances>[number] & { memberName: string }>> {
     const parsedSpaceId = parseWithSchema(spaceIdSchema, spaceId);
     const space = await this.database.space.findUnique({
       where: { id: parsedSpaceId }
@@ -23,6 +25,7 @@ export class BalancesService {
       where: {
         spaceId: parsedSpaceId
       },
+      include: { user: true },
       orderBy: { createdAt: "asc" }
     });
     const ledgerEntries = await this.database.ledgerEntry.findMany({
@@ -30,22 +33,31 @@ export class BalancesService {
       orderBy: { createdAt: "asc" }
     });
 
-    return core.calculateBalances({
-      memberIds: members.map((member) => member.id),
-      ledgerEntries: ledgerEntries.map((entry) => ({
-        id: entry.id,
-        spaceId: entry.spaceId,
-        eventId: entry.eventId,
-        eventType: entry.eventType,
-        fromMemberId: entry.fromMemberId,
-        toMemberId: entry.toMemberId,
-        amountMinor: entry.amountMinor,
-        currency: entry.currency,
-        referenceType: entry.referenceType,
-        referenceId: entry.referenceId,
-        createdAt: entry.createdAt
-      })),
-      currency: space.currency
-    });
+    const memberNamesById = new Map(
+      members.map((member) => [member.id, member.nickname ?? member.user.displayName])
+    );
+
+    return core
+      .calculateBalances({
+        memberIds: members.map((member) => member.id),
+        ledgerEntries: ledgerEntries.map((entry) => ({
+          id: entry.id,
+          spaceId: entry.spaceId,
+          eventId: entry.eventId,
+          eventType: entry.eventType,
+          fromMemberId: entry.fromMemberId,
+          toMemberId: entry.toMemberId,
+          amountMinor: entry.amountMinor,
+          currency: entry.currency,
+          referenceType: entry.referenceType,
+          referenceId: entry.referenceId,
+          createdAt: entry.createdAt
+        })),
+        currency: space.currency
+      })
+      .map((balance) => ({
+        ...balance,
+        memberName: memberNamesById.get(balance.memberId) ?? balance.memberId
+      }));
   }
 }

@@ -10,8 +10,19 @@ export class SettlementService {
   async getBySpaceId(spaceId: string): Promise<ReturnType<typeof core.simplifyDebts>> {
     const balances = await this.balancesService.getBySpaceId(spaceId);
 
-    return core.simplifyDebts({
-      balances
-    });
+    const memberNamesById = new Map(
+      balances.map((balance) => [balance.memberId, balance.memberName])
+    );
+
+    return core
+      .simplifyDebts({
+        balances
+      })
+      .map((payment) => ({
+        ...payment,
+        fromMemberName: memberNamesById.get(payment.fromMemberId) ?? payment.fromMemberId,
+        toMemberName: memberNamesById.get(payment.toMemberId) ?? payment.toMemberId,
+        status: "manual_pending"
+      }));
   }
 }

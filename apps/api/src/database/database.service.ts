@@ -1,4 +1,4 @@
-import { Injectable, type OnModuleDestroy } from "@nestjs/common";
+import { Injectable, Optional, type OnModuleDestroy } from "@nestjs/common";
 import { prisma } from "@ia-financeira/database";
 
 export type DatabaseOperationClient = Pick<
@@ -11,7 +11,7 @@ export type DatabaseClient = DatabaseOperationClient &
 
 @Injectable()
 export class DatabaseService implements OnModuleDestroy {
-  constructor(private readonly client: DatabaseClient = prisma as DatabaseClient) {}
+  constructor(@Optional() private readonly client: DatabaseClient = prisma as DatabaseClient) {}
 
   get auditLog() {
     return this.client.auditLog;

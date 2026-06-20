@@ -23,6 +23,7 @@ export type DatabaseMock = {
   };
   space: {
     create: FunctionMock;
+    findMany: FunctionMock;
     findUnique: FunctionMock;
   };
   spaceMember: {
@@ -56,6 +57,7 @@ export function createDatabaseMock(): DatabaseMock {
     },
     space: {
       create: vi.fn(),
+      findMany: vi.fn(),
       findUnique: vi.fn()
     },
     spaceMember: {

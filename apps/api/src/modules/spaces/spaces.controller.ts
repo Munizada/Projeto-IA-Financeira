@@ -8,6 +8,11 @@ import { SpacesService } from "./spaces.service.js";
 export class SpacesController {
   constructor(private readonly spacesService: SpacesService) {}
 
+  @Get()
+  list(): Promise<unknown[]> {
+    return this.spacesService.list();
+  }
+
   @Post()
   create(
     @Body(new ZodValidationPipe(createSpaceSchema))

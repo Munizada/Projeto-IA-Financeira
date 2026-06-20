@@ -4,7 +4,7 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "dev": "corepack pnpm --filter @ia-financeira/shared build && corepack pnpm --filter @ia-financeira/core build && corepack pnpm --filter @ia-financeira/database build && tsx watch src/main.ts",
+    "dev": "corepack pnpm --filter @ia-financeira/shared build && corepack pnpm --filter @ia-financeira/core build && corepack pnpm --filter @ia-financeira/database build && corepack pnpm --filter @ia-financeira/api build && node --watch dist/main.js",
     "build": "corepack pnpm --filter @ia-financeira/shared build && corepack pnpm --filter @ia-financeira/core build && corepack pnpm --filter @ia-financeira/database build && tsc -p tsconfig.build.json",
     "start": "node dist/main.js",
     "lint": "eslint .",

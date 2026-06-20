@@ -20,9 +20,9 @@ describe("BalancesService", () => {
       currency: "BRL"
     });
     database.spaceMember.findMany.mockResolvedValue([
-      { id: "member-arthur" },
-      { id: "member-bruno" },
-      { id: "member-caio" }
+      { id: "member-arthur", nickname: "Arthur", user: { displayName: "Arthur" } },
+      { id: "member-bruno", nickname: "Bruno", user: { displayName: "Bruno" } },
+      { id: "member-caio", nickname: "Caio", user: { displayName: "Caio" } }
     ]);
     database.ledgerEntry.findMany.mockResolvedValue([
       {
@@ -44,9 +44,9 @@ describe("BalancesService", () => {
 
     expect(calculateSpy).toHaveBeenCalled();
     expect(balances).toEqual([
-      { memberId: "member-arthur", balanceMinor: 6000, currency: "BRL" },
-      { memberId: "member-bruno", balanceMinor: -6000, currency: "BRL" },
-      { memberId: "member-caio", balanceMinor: 0, currency: "BRL" }
+      { memberId: "member-arthur", memberName: "Arthur", balanceMinor: 6000, currency: "BRL" },
+      { memberId: "member-bruno", memberName: "Bruno", balanceMinor: -6000, currency: "BRL" },
+      { memberId: "member-caio", memberName: "Caio", balanceMinor: 0, currency: "BRL" }
     ]);
   });
 });
