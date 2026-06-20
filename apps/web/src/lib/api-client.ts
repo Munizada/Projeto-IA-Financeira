@@ -17,7 +17,8 @@ const memberSchema = z.object({
   name: z.string(),
   role: z.enum(["organizer", "member"]),
   status: z.literal("active"),
-  nickname: z.string().optional()
+  nickname: z.string().optional(),
+  userId: z.string().optional()
 });
 
 const spaceSchema = z.object({
@@ -74,6 +75,47 @@ const spacesSchema = z.array(spaceSchema);
 const expensesSchema = z.array(expenseSchema);
 const balancesSchema = z.array(balanceSchema);
 const settlementListSchema = z.array(settlementSchema);
+const createdResourceSchema = z.object({ id: z.string() }).passthrough();
+
+export type CreateSpaceInput = {
+  name: string;
+  type: DemoSpace["type"];
+  currency: "BRL";
+  creatorUserId: string;
+};
+
+export type AddSpaceMemberInput = {
+  userId: string;
+  role: "organizer" | "member";
+  nickname?: string;
+};
+
+export type CreateExpenseInput = {
+  createdByUserId: string;
+  payerMemberId: string;
+  amountMinor: number;
+  currency: "BRL";
+  description: string;
+  category?: string;
+  expenseDate: string;
+  splitRule: "equal";
+  participants: Array<{ memberId: string }>;
+};
+
+export type ConfirmPaymentInput = {
+  payerMemberId: string;
+  receiverMemberId: string;
+  amountMinor: number;
+  currency: "BRL";
+  createdByUserId: string;
+};
+
+export class ApiWriteError extends Error {
+  constructor(message: string) {
+    super(message);
+    this.name = "ApiWriteError";
+  }
+}
 
 function getApiBaseUrl(): string | null {
   const baseUrl = process.env.NEXT_PUBLIC_API_BASE_URL?.trim();
@@ -110,6 +152,38 @@ async function fetchWithFallback<TValue>(
   }
 }
 
+async function postJson<TValue>(
+  path: string,
+  payload: unknown,
+  schema: z.ZodType<TValue>
+): Promise<TValue> {
+  const baseUrl = getApiBaseUrl();
+
+  if (!baseUrl) {
+    throw new ApiWriteError("API base URL is not configured");
+  }
+
+  let response: Response;
+
+  try {
+    response = await fetch(`${baseUrl}${path}`, {
+      body: JSON.stringify(payload),
+      headers: {
+        "content-type": "application/json"
+      },
+      method: "POST"
+    });
+  } catch {
+    throw new ApiWriteError("API request failed");
+  }
+
+  if (!response.ok) {
+    throw new ApiWriteError(`API request failed with status ${response.status}`);
+  }
+
+  return schema.parse(await response.json());
+}
+
 export async function getSpaces(): Promise<DemoSpace[]> {
   return fetchWithFallback("/spaces", spacesSchema, () => mockSpaces);
 }
@@ -136,4 +210,29 @@ export async function getSpaceSettlement(spaceId: string): Promise<DemoSettlemen
   return fetchWithFallback(`/spaces/${spaceId}/settlement`, settlementListSchema, () => {
     return mockSettlementBySpaceId[spaceId] ?? [];
   });
+}
+
+export async function createSpace(input: CreateSpaceInput): Promise<{ id: string }> {
+  return postJson("/spaces", input, createdResourceSchema);
+}
+
+export async function addSpaceMember(
+  spaceId: string,
+  input: AddSpaceMemberInput
+): Promise<{ id: string }> {
+  return postJson(`/spaces/${spaceId}/members`, input, createdResourceSchema);
+}
+
+export async function createExpense(
+  spaceId: string,
+  input: CreateExpenseInput
+): Promise<{ id: string }> {
+  return postJson(`/spaces/${spaceId}/expenses`, input, createdResourceSchema);
+}
+
+export async function confirmPayment(
+  spaceId: string,
+  input: ConfirmPaymentInput
+): Promise<unknown> {
+  return postJson(`/spaces/${spaceId}/payments/confirm`, input, z.unknown());
 }

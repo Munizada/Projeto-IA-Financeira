@@ -80,6 +80,7 @@ describe("ExpensesService", () => {
     });
     expect(createCall.data.splits.create).toHaveLength(4);
     expect(createCall.data.ledgerEntries.create).toHaveLength(3);
+    expect(createCall.data.ledgerEntries.create[0]).not.toHaveProperty("expenseId");
     expect(
       createCall.data.ledgerEntries.create.some(
         (entry) => entry.fromMemberId === "member-arthur" && entry.toMemberId === "member-arthur"

@@ -117,7 +117,6 @@ export class ExpensesService {
               currency: entry.currency,
               referenceType: entry.referenceType,
               referenceId: entry.referenceId,
-              expenseId,
               createdAt: entry.createdAt
             }))
           }

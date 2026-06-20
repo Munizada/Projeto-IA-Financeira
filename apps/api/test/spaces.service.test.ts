@@ -91,6 +91,7 @@ describe("SpacesService", () => {
         members: [
           {
             id: "member-arthur",
+            userId: "user-arthur",
             role: "organizer",
             status: "active",
             nickname: "Arthur",

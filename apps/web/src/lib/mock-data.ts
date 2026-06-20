@@ -4,6 +4,7 @@ export type DemoMember = {
   role: "organizer" | "member";
   status: "active";
   nickname?: string | undefined;
+  userId?: string | undefined;
 };
 
 export type DemoSpace = {
@@ -57,10 +58,16 @@ export type DemoSettlementPayment = {
 };
 
 const floripaMembers: DemoMember[] = [
-  { id: "member-arthur", name: "Arthur", role: "organizer", status: "active" },
-  { id: "member-ana", name: "Ana", role: "member", status: "active" },
-  { id: "member-bruno", name: "Bruno", role: "member", status: "active" },
-  { id: "member-caio", name: "Caio", role: "member", status: "active" }
+  {
+    id: "member-arthur",
+    name: "Arthur",
+    role: "organizer",
+    status: "active",
+    userId: "user-arthur"
+  },
+  { id: "member-ana", name: "Ana", role: "member", status: "active", userId: "user-ana" },
+  { id: "member-bruno", name: "Bruno", role: "member", status: "active", userId: "user-bruno" },
+  { id: "member-caio", name: "Caio", role: "member", status: "active", userId: "user-caio" }
 ];
 
 export const mockSpaces: DemoSpace[] = [

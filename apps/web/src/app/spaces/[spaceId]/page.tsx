@@ -1,26 +1,56 @@
+import { revalidatePath } from "next/cache";
 import { notFound } from "next/navigation";
+import { redirect } from "next/navigation";
 
 import { Button } from "../../../components/button";
 import { Card } from "../../../components/card";
 import { Money } from "../../../components/money";
 import { PageHeader } from "../../../components/page-header";
 import { StatusBadge } from "../../../components/status-badge";
-import { getSpace } from "../../../lib/api-client";
+import { addSpaceMember, getSpace } from "../../../lib/api-client";
 import { routes } from "../../../lib/routes";
+import { seedUsers } from "../../../lib/seed-users";
 
 type SpaceDetailPageProps = {
   params: Promise<{
     spaceId: string;
   }>;
+  searchParams?: Promise<Record<string, string | string[] | undefined>>;
 };
 
-export default async function SpaceDetailPage({ params }: SpaceDetailPageProps) {
+async function addMemberAction(spaceId: string, formData: FormData) {
+  "use server";
+
+  let target = `${routes.space(spaceId)}?memberError=1`;
+
+  try {
+    const nickname = getOptionalFormValue(formData, "nickname");
+
+    await addSpaceMember(spaceId, {
+      userId: getRequiredFormValue(formData, "userId"),
+      role: getRequiredFormValue(formData, "role") as "organizer" | "member",
+      ...(nickname ? { nickname } : {})
+    });
+    revalidatePath(routes.space(spaceId));
+    target = `${routes.space(spaceId)}?memberCreated=1`;
+  } catch {
+    target = `${routes.space(spaceId)}?memberError=1`;
+  }
+
+  redirect(target);
+}
+
+export default async function SpaceDetailPage({ params, searchParams }: SpaceDetailPageProps) {
   const { spaceId } = await params;
   const space = await getSpace(spaceId);
+  const currentParams = (await searchParams) ?? {};
 
   if (!space) {
     notFound();
   }
+
+  const existingUserIds = new Set(space.members.map((member) => member.userId).filter(Boolean));
+  const availableUsers = seedUsers.filter((user) => !existingUserIds.has(user.id));
 
   return (
     <div className="page-stack">
@@ -40,6 +70,13 @@ export default async function SpaceDetailPage({ params }: SpaceDetailPageProps) 
         subtitle={space.summary}
         title={space.name}
       />
+
+      {currentParams.memberCreated ? (
+        <p className="notice notice--success">Membro adicionado com sucesso.</p>
+      ) : null}
+      {currentParams.memberError ? (
+        <p className="notice notice--error">Nao foi possivel adicionar o membro.</p>
+      ) : null}
 
       <div className="grid-4">
         <Card title="Status">
@@ -77,6 +114,40 @@ export default async function SpaceDetailPage({ params }: SpaceDetailPageProps) 
             ))}
           </ul>
         </Card>
+        <Card title="Adicionar membro">
+          {availableUsers.length === 0 ? (
+            <p className="helper-text">Todos os usuarios seedados ja estao neste espaco.</p>
+          ) : (
+            <form action={addMemberAction.bind(null, space.id)} className="form-grid">
+              <label>
+                Usuario
+                <select name="userId" required>
+                  {availableUsers.map((user) => (
+                    <option key={user.id} value={user.id}>
+                      {user.name}
+                    </option>
+                  ))}
+                </select>
+              </label>
+              <label>
+                Papel
+                <select defaultValue="member" name="role" required>
+                  <option value="member">Membro</option>
+                  <option value="organizer">Organizador</option>
+                </select>
+              </label>
+              <label>
+                Apelido
+                <input name="nickname" placeholder="Opcional" />
+              </label>
+              <div className="form-actions">
+                <button className="button button--primary" type="submit">
+                  Adicionar membro
+                </button>
+              </div>
+            </form>
+          )}
+        </Card>
         <Card title="Navegacao do espaco">
           <div className="subnav">
             <Button href={routes.spaceExpenses(space.id)} kind="secondary">
@@ -97,4 +168,24 @@ export default async function SpaceDetailPage({ params }: SpaceDetailPageProps) 
       </div>
     </div>
   );
+}
+
+function getRequiredFormValue(formData: FormData, key: string): string {
+  const value = formData.get(key);
+
+  if (typeof value !== "string" || value.trim().length === 0) {
+    throw new Error(`Missing form field: ${key}`);
+  }
+
+  return value.trim();
+}
+
+function getOptionalFormValue(formData: FormData, key: string): string | undefined {
+  const value = formData.get(key);
+
+  if (typeof value !== "string" || value.trim().length === 0) {
+    return undefined;
+  }
+
+  return value.trim();
 }

@@ -101,6 +101,7 @@ type SpaceForWeb = {
     role: "organizer" | "member";
     status: "active";
     nickname?: string | undefined;
+    userId: string;
   }>;
   totalExpensesMinor: number;
   yourBalanceMinor: number;
@@ -129,6 +130,7 @@ function mapSpaceForWeb(space: {
   }>;
   members: Array<{
     id: string;
+    userId: string;
     role: string;
     status: string;
     nickname: string | null;
@@ -155,6 +157,7 @@ function mapSpaceForWeb(space: {
       name: member.nickname ?? member.user.displayName,
       role: member.role === "organizer" ? "organizer" : "member",
       status: "active",
+      userId: member.userId,
       ...(member.nickname ? { nickname: member.nickname } : {})
     })),
     totalExpensesMinor: space.expenses.reduce((total, expense) => total + expense.amountMinor, 0),
