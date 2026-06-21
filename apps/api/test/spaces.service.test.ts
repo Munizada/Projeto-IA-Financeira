@@ -35,6 +35,15 @@ describe("SpacesService", () => {
         creatorUserId: "user-1"
       })
     ).resolves.toEqual(createdSpace);
+    expect(database.auditLog.create).toHaveBeenCalledWith({
+      data: expect.objectContaining({
+        action: "space.created",
+        actorUserId: "user-1",
+        objectId: "space-1",
+        objectType: "space",
+        spaceId: "space-1"
+      })
+    });
   });
 
   it("fails when name is empty", async () => {
@@ -123,5 +132,45 @@ describe("SpacesService", () => {
     database.space.findUnique.mockResolvedValue(null);
 
     await expect(service.getById("space-missing")).rejects.toThrow(NotFoundException);
+  });
+
+  it("lists space activity from audit logs in reverse chronological order", async () => {
+    const database = createDatabaseMock();
+    const service = new SpacesService(new DatabaseService(database as unknown as DatabaseClient));
+    const createdAt = new Date("2026-06-20T12:00:00.000Z");
+
+    database.space.findUnique.mockResolvedValue({ id: "space-1" });
+    database.auditLog.findMany.mockResolvedValue([
+      {
+        id: "audit-1",
+        action: "expense.cancelled",
+        objectType: "expense",
+        objectId: "expense-1",
+        actorUserId: "user-1",
+        spaceId: "space-1",
+        before: { status: "confirmed" },
+        after: { status: "cancelled", reason: "duplicada" },
+        createdAt
+      }
+    ]);
+
+    await expect(service.getActivity("space-1")).resolves.toEqual([
+      {
+        id: "audit-1",
+        action: "expense.cancelled",
+        objectType: "expense",
+        objectId: "expense-1",
+        actorUserId: "user-1",
+        spaceId: "space-1",
+        summary: "Despesa cancelada.",
+        createdAt: createdAt.toISOString(),
+        before: { status: "confirmed" },
+        after: { status: "cancelled", reason: "duplicada" }
+      }
+    ]);
+    expect(database.auditLog.findMany).toHaveBeenCalledWith({
+      where: { spaceId: "space-1" },
+      orderBy: { createdAt: "desc" }
+    });
   });
 });

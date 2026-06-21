@@ -63,6 +63,9 @@ export default async function SpaceDetailPage({ params, searchParams }: SpaceDet
             <Button href={routes.spaceBalances(space.id)} kind="secondary">
               Ver saldos
             </Button>
+            <Button href={routes.spaceActivity(space.id)} kind="secondary">
+              Historico
+            </Button>
             <Button href={routes.spaceSettlement(space.id)}>Ver acerto</Button>
           </div>
         }
@@ -158,6 +161,9 @@ export default async function SpaceDetailPage({ params, searchParams }: SpaceDet
             </Button>
             <Button href={routes.spaceSettlement(space.id)} kind="secondary">
               Acerto
+            </Button>
+            <Button href={routes.spaceActivity(space.id)} kind="secondary">
+              Historico
             </Button>
           </div>
           <p className="helper-text">

@@ -46,6 +46,21 @@ export class SpacesService {
         }
       });
 
+      await database.auditLog.create({
+        data: {
+          actorUserId: payload.creatorUserId,
+          spaceId: space.id,
+          action: "space.created",
+          objectType: "space",
+          objectId: space.id,
+          after: {
+            name: space.name,
+            type: space.type,
+            currency
+          }
+        }
+      });
+
       return space;
     });
   }
@@ -85,6 +100,39 @@ export class SpacesService {
     });
 
     return spaces.map(mapSpaceForWeb);
+  }
+
+  async getActivity(spaceId: string): Promise<unknown[]> {
+    const id = parseWithSchema(spaceIdSchema, spaceId);
+    await this.ensureSpaceExists(id);
+
+    const logs = await this.database.auditLog.findMany({
+      where: { spaceId: id },
+      orderBy: { createdAt: "desc" }
+    });
+
+    return logs.map((log) => ({
+      id: log.id,
+      action: log.action,
+      objectType: log.objectType,
+      objectId: log.objectId,
+      actorUserId: log.actorUserId,
+      spaceId: log.spaceId,
+      summary: summarizeAuditAction(log.action),
+      createdAt: log.createdAt.toISOString(),
+      before: log.before,
+      after: log.after
+    }));
+  }
+
+  private async ensureSpaceExists(spaceId: string): Promise<void> {
+    const space = await this.database.space.findUnique({
+      where: { id: spaceId }
+    });
+
+    if (!space) {
+      throw new NotFoundException(`Space ${spaceId} was not found.`);
+    }
   }
 }
 
@@ -219,4 +267,17 @@ function normalizeSpaceStatus(status: string): SpaceForWeb["status"] {
   }
 
   return "active";
+}
+
+function summarizeAuditAction(action: string): string {
+  const summaries: Record<string, string> = {
+    "space.created": "Espaco criado.",
+    "member.added": "Membro adicionado.",
+    "expense.created": "Despesa criada.",
+    "expense.cancelled": "Despesa cancelada.",
+    "expense.adjusted": "Despesa ajustada.",
+    "payment.confirmed": "Pagamento confirmado."
+  };
+
+  return summaries[action] ?? "Atividade registrada.";
 }

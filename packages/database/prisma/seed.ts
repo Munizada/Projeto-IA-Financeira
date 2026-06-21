@@ -205,14 +205,15 @@ async function main() {
   await prisma.auditLog.upsert({
     where: { id: "audit-seed-airbnb" },
     update: {
-      action: "expense.confirmed"
+      action: "expense.created",
+      objectType: "expense"
     },
     create: {
       id: "audit-seed-airbnb",
       actorUserId: "user-arthur",
       spaceId: "space-floripa-mvp",
-      action: "expense.confirmed",
-      objectType: "Expense",
+      action: "expense.created",
+      objectType: "expense",
       objectId: "expense-airbnb",
       after: { amountMinor: 48000, currency: "BRL", description: "Airbnb" },
       requestId: "seed-request"

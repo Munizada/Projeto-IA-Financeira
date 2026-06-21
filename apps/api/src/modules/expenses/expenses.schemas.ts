@@ -24,4 +24,16 @@ export const createExpenseSchema = z.object({
     .min(1)
 });
 
+export const cancelExpenseSchema = z.object({
+  actorUserId: nonEmptyString,
+  reason: nonEmptyString.optional()
+});
+
+export const adjustExpenseSchema = createExpenseSchema.extend({
+  actorUserId: nonEmptyString,
+  reason: nonEmptyString.optional()
+});
+
 export type CreateExpenseInput = z.infer<typeof createExpenseSchema>;
+export type CancelExpenseInput = z.infer<typeof cancelExpenseSchema>;
+export type AdjustExpenseInput = z.infer<typeof adjustExpenseSchema>;

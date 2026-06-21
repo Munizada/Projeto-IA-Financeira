@@ -35,9 +35,25 @@ export type DemoExpense = {
   expenseDate: string;
   payerMemberId: string;
   payerMemberName: string;
-  status: "confirmed";
+  status: "confirmed" | "adjusted" | "cancelled";
+  version?: number | undefined;
+  parentExpenseId?: string | null | undefined;
+  cancelledAt?: string | null | undefined;
   splitRule: "equal";
   splits: DemoExpenseSplit[];
+};
+
+export type DemoActivityItem = {
+  id: string;
+  action: string;
+  objectType: string;
+  objectId?: string | null | undefined;
+  actorUserId?: string | null | undefined;
+  spaceId?: string | null | undefined;
+  summary: string;
+  createdAt: string;
+  before?: unknown | undefined;
+  after?: unknown | undefined;
 };
 
 export type DemoBalance = {
@@ -112,6 +128,7 @@ export const mockExpensesBySpaceId: Record<string, DemoExpense[]> = {
       payerMemberId: "member-arthur",
       payerMemberName: "Arthur",
       status: "confirmed",
+      version: 1,
       splitRule: "equal",
       splits: [
         { memberId: "member-arthur", memberName: "Arthur", amountMinor: 12000 },
@@ -132,11 +149,49 @@ export const mockExpensesBySpaceId: Record<string, DemoExpense[]> = {
       payerMemberId: "member-lia",
       payerMemberName: "Lia",
       status: "confirmed",
+      version: 1,
       splitRule: "equal",
       splits: [
         { memberId: "member-lia", memberName: "Lia", amountMinor: 11000 },
         { memberId: "member-joao", memberName: "Joao", amountMinor: 11000 }
       ]
+    }
+  ]
+};
+
+export const mockActivityBySpaceId: Record<string, DemoActivityItem[]> = {
+  "space-floripa": [
+    {
+      id: "audit-mock-expense-airbnb",
+      action: "expense.created",
+      objectType: "expense",
+      objectId: "expense-airbnb",
+      actorUserId: "user-arthur",
+      spaceId: "space-floripa",
+      summary: "Despesa criada.",
+      createdAt: "2026-06-18T12:00:00.000Z"
+    },
+    {
+      id: "audit-mock-space-floripa",
+      action: "space.created",
+      objectType: "space",
+      objectId: "space-floripa",
+      actorUserId: "user-arthur",
+      spaceId: "space-floripa",
+      summary: "Espaco criado.",
+      createdAt: "2026-06-18T09:00:00.000Z"
+    }
+  ],
+  "space-apartamento": [
+    {
+      id: "audit-mock-expense-luz",
+      action: "expense.created",
+      objectType: "expense",
+      objectId: "expense-luz",
+      actorUserId: "user-lia",
+      spaceId: "space-apartamento",
+      summary: "Despesa criada.",
+      createdAt: "2026-06-10T12:00:00.000Z"
     }
   ]
 };

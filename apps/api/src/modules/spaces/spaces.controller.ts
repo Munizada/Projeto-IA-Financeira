@@ -21,6 +21,14 @@ export class SpacesController {
     return this.spacesService.create(body);
   }
 
+  @Get(":spaceId/activity")
+  getActivity(
+    @Param("spaceId", new ZodValidationPipe(spaceIdSchema))
+    spaceId: string
+  ): Promise<unknown[]> {
+    return this.spacesService.getActivity(spaceId);
+  }
+
   @Get(":spaceId")
   getById(
     @Param("spaceId", new ZodValidationPipe(spaceIdSchema))

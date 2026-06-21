@@ -2,10 +2,12 @@ import { z } from "zod";
 
 import {
   getMockSpace,
+  mockActivityBySpaceId,
   mockBalancesBySpaceId,
   mockExpensesBySpaceId,
   mockSettlementBySpaceId,
   mockSpaces,
+  type DemoActivityItem,
   type DemoBalance,
   type DemoExpense,
   type DemoSettlementPayment,
@@ -43,7 +45,10 @@ const expenseSchema = z.object({
   expenseDate: z.string(),
   payerMemberId: z.string(),
   payerMemberName: z.string(),
-  status: z.literal("confirmed"),
+  status: z.enum(["confirmed", "adjusted", "cancelled"]),
+  version: z.number().int().optional(),
+  parentExpenseId: z.string().nullable().optional(),
+  cancelledAt: z.string().nullable().optional(),
   splitRule: z.literal("equal"),
   splits: z.array(
     z.object({
@@ -71,10 +76,24 @@ const settlementSchema = z.object({
   status: z.literal("manual_pending")
 });
 
+const activitySchema = z.object({
+  id: z.string(),
+  action: z.string(),
+  objectType: z.string(),
+  objectId: z.string().nullable().optional(),
+  actorUserId: z.string().nullable().optional(),
+  spaceId: z.string().nullable().optional(),
+  summary: z.string(),
+  createdAt: z.string(),
+  before: z.unknown().optional(),
+  after: z.unknown().optional()
+});
+
 const spacesSchema = z.array(spaceSchema);
 const expensesSchema = z.array(expenseSchema);
 const balancesSchema = z.array(balanceSchema);
 const settlementListSchema = z.array(settlementSchema);
+const activityListSchema = z.array(activitySchema);
 const createdResourceSchema = z.object({ id: z.string() }).passthrough();
 
 export type CreateSpaceInput = {
@@ -110,6 +129,16 @@ export type ConfirmPaymentInput = {
   createdByUserId: string;
 };
 
+export type CancelExpenseInput = {
+  actorUserId: string;
+  reason?: string;
+};
+
+export type AdjustExpenseInput = CreateExpenseInput & {
+  actorUserId: string;
+  reason?: string;
+};
+
 export class ApiWriteError extends Error {
   constructor(message: string) {
     super(message);
@@ -124,7 +153,7 @@ function getApiBaseUrl(): string | null {
 }
 
 function shouldUseMockData(): boolean {
-  return process.env.NODE_ENV === "test" || !getApiBaseUrl();
+  return !getApiBaseUrl();
 }
 
 async function fetchWithFallback<TValue>(
@@ -212,6 +241,12 @@ export async function getSpaceSettlement(spaceId: string): Promise<DemoSettlemen
   });
 }
 
+export async function getSpaceActivity(spaceId: string): Promise<DemoActivityItem[]> {
+  return fetchWithFallback(`/spaces/${spaceId}/activity`, activityListSchema, () => {
+    return mockActivityBySpaceId[spaceId] ?? [];
+  });
+}
+
 export async function createSpace(input: CreateSpaceInput): Promise<{ id: string }> {
   return postJson("/spaces", input, createdResourceSchema);
 }
@@ -228,6 +263,22 @@ export async function createExpense(
   input: CreateExpenseInput
 ): Promise<{ id: string }> {
   return postJson(`/spaces/${spaceId}/expenses`, input, createdResourceSchema);
+}
+
+export async function cancelExpense(
+  spaceId: string,
+  expenseId: string,
+  input: CancelExpenseInput
+): Promise<unknown> {
+  return postJson(`/spaces/${spaceId}/expenses/${expenseId}/cancel`, input, z.unknown());
+}
+
+export async function adjustExpense(
+  spaceId: string,
+  expenseId: string,
+  input: AdjustExpenseInput
+): Promise<unknown> {
+  return postJson(`/spaces/${spaceId}/expenses/${expenseId}/adjust`, input, z.unknown());
 }
 
 export async function confirmPayment(

@@ -16,7 +16,7 @@ export class MembersService {
 
     await this.ensureSpaceExists(parsedSpaceId);
 
-    return this.database.spaceMember.create({
+    const member = await this.database.spaceMember.create({
       data: {
         spaceId: parsedSpaceId,
         userId: payload.userId,
@@ -26,6 +26,23 @@ export class MembersService {
         ...(payload.nickname ? { nickname: payload.nickname } : {})
       }
     });
+
+    await this.database.auditLog.create({
+      data: {
+        actorUserId: payload.userId,
+        spaceId: parsedSpaceId,
+        action: "member.added",
+        objectType: "member",
+        objectId: member.id,
+        after: {
+          userId: payload.userId,
+          role: payload.role ?? "member",
+          nickname: payload.nickname ?? null
+        }
+      }
+    });
+
+    return member;
   }
 
   async listBySpace(spaceId: string): Promise<unknown[]> {

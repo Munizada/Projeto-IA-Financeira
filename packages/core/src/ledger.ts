@@ -54,6 +54,39 @@ export function createLedgerEntriesFromExpense(params: {
     });
 }
 
+export function createReversalLedgerEntries(params: {
+  originalEntries: LedgerEntry[];
+  eventType: LedgerEventType;
+  referenceType: LedgerReferenceType;
+  referenceId: string;
+  eventId?: string;
+  createdAt?: Date;
+}): LedgerEntry[] {
+  const referenceId = requireId(params.referenceId, "referenceId");
+  const eventId = params.eventId ?? `${params.referenceType}:${referenceId}:reversal`;
+  const createdAt = params.createdAt ?? new Date(0);
+
+  return [...params.originalEntries]
+    .sort((a, b) => (a.id < b.id ? -1 : a.id > b.id ? 1 : 0))
+    .map((entry) => {
+      validateLedgerEntry(entry);
+
+      return {
+        id: `${eventId}:${entry.toMemberId}:${entry.fromMemberId}`,
+        spaceId: entry.spaceId,
+        eventId,
+        eventType: params.eventType,
+        fromMemberId: entry.toMemberId,
+        toMemberId: entry.fromMemberId,
+        amountMinor: entry.amountMinor,
+        currency: normalizeCurrency(entry.currency),
+        referenceType: params.referenceType,
+        referenceId,
+        createdAt
+      };
+    });
+}
+
 export function validateLedgerEntry(entry: LedgerEntry, expectedCurrency?: string): void {
   requireId(entry.id, "ledgerEntry.id");
   requireId(entry.spaceId, "ledgerEntry.spaceId");
